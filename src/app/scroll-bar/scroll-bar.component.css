@@ -9,3 +9,12 @@
   width: 30px;
   background-color: gray;
 }
+
+.frame {
+  width: 300px; 
+  overflow: hidden
+}
+
+.container {
+  width: 300px;
+}
