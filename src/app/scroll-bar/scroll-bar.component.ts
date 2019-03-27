@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ViewChild, ElementRef, HostListener } from '@angular/core';
 
 @Component({
   selector: 'essex-scroll-bar',
@@ -21,6 +21,11 @@ export class ScrollBarComponent implements OnInit {
   scrollAmount: number = 0; 
 
   constructor() { }
+
+  @HostListener('document:mouseup', ['$event'])
+  documentMouseUp(ev:MouseEvent) {
+    this.mouseUp(ev);
+  }
 
   mouseDown(event: MouseEvent) {
     this.sliderStart(event);
@@ -51,7 +56,6 @@ export class ScrollBarComponent implements OnInit {
     this.lastPos = event.clientX;
   }
 
-
   ngOnInit() {
   }
 
@@ -72,7 +76,7 @@ export class ScrollBarComponent implements OnInit {
     this.sliding = false;
   }
 
-  private scrollLeft(mouseX) {
+  private scrollLeft(mouseX: number) {
     var margin = (mouseX - this.slideStartedX) + this.slideOffsetX;
     if ((margin + this.sliderSize) > this.scrollbar.nativeElement.clientWidth) {
       margin = margin - ((margin + this.sliderSize) - this.scrollbar.nativeElement.clientWidth);
@@ -82,7 +86,7 @@ export class ScrollBarComponent implements OnInit {
     this.slider.nativeElement.style.marginLeft = margin + 'px';
   }
 
-  scrollRight(mouseX) {
+  private scrollRight(mouseX: number) {
     var margin = (mouseX - this.slideStartedX) + this.slideOffsetX;
     if (margin < 0)
       return;
