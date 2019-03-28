@@ -73,7 +73,6 @@ export class ScrollBarComponent implements OnInit {
   ngAfterViewInit() {
     this.scrollbar.nativeElement.style.width = this.width;
     this.frame.nativeElement.style.width = this.width;
-
     this.sliderSize = this.frame.nativeElement.clientWidth / 5;
     this.scrollAmount =
       this.frame.nativeElement.scrollWidth /
