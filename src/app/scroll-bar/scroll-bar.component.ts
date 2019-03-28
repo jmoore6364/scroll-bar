@@ -1,16 +1,26 @@
-import { Component, OnInit, ChangeDetectionStrategy, ViewChild, ElementRef, HostListener } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  ViewChild,
+  ElementRef,
+  HostListener,
+  Input,
+} from '@angular/core';
 
 @Component({
-  selector: 'essex-scroll-bar',
+  selector: 'esx-scroll-bar',
   templateUrl: './scroll-bar.component.html',
   styleUrls: ['./scroll-bar.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ScrollBarComponent implements OnInit {
-  @ViewChild('container') container: ElementRef<HTMLElement>;
-  @ViewChild('slider') slider: ElementRef<HTMLElement>;
-  @ViewChild('scrollbar') scrollbar: ElementRef<HTMLElement>;
-  @ViewChild('frame') frame: ElementRef<HTMLElement>;
+  @ViewChild('slider')
+  slider!: ElementRef<HTMLElement>;
+  @ViewChild('scrollbar') scrollbar!: ElementRef<HTMLElement>;
+  @ViewChild('frame') frame!: ElementRef<HTMLElement>;
+
+  @Input('width') width: string = '100%';
 
   sliding: boolean = false;
   direction: string = 'none';
@@ -18,9 +28,9 @@ export class ScrollBarComponent implements OnInit {
   slideOffsetX: number = 0;
   lastPos: number = 0;
   sliderSize: number = 0;
-  scrollAmount: number = 0; 
+  scrollAmount: number = 0;
 
-  constructor() { }
+  constructor() {}
 
   @HostListener('document:mouseup', ['$event'])
   documentMouseUp(event: MouseEvent) {
@@ -32,8 +42,22 @@ export class ScrollBarComponent implements OnInit {
     this.mouseMove(event);
   }
 
+  @HostListener('document:touchend', ['$event'])
+  documentTouchEnd(event: TouchEvent) {
+    this.sliderStop();
+  }
+
+  @HostListener('document:touchmove', ['$event'])
+  documentTouchMove(event: TouchEvent) {
+    this.onDragSlider(event.touches[0].clientX);
+  }
+
+  touchStart(event: TouchEvent) {
+    this.sliderStart(event.touches[0].clientX);
+  }
+
   mouseDown(event: MouseEvent) {
-    this.sliderStart(event);
+    this.sliderStart(event.clientX);
   }
 
   mouseUp(event: MouseEvent) {
@@ -41,39 +65,43 @@ export class ScrollBarComponent implements OnInit {
   }
 
   mouseMove(event: MouseEvent) {
-    if (!this.sliding)
-      return;
-    if (this.lastPos === 0)
-      this.lastPos = event.clientX;
-    if (this.lastPos === event.clientX) {
-      this.direction = "none";
-    } else if (this.lastPos < event.clientX) {
-      if (this.direction === "left")
-        this.sliderStart(event);
-      this.direction = "right";
-      this.scroll(event.clientX, this.direction);
-    } else {
-      if (this.direction === "right")
-        this.sliderStart(event);
-      this.direction = "left";
-      this.scroll(event.clientX, this.direction);
-    }
-    this.lastPos = event.clientX;
+    this.onDragSlider(event.clientX);
   }
 
-  ngOnInit() {
-  }
+  ngOnInit() {}
 
   ngAfterViewInit() {
+    this.scrollbar.nativeElement.style.width = this.width;
+    this.frame.nativeElement.style.width = this.width;
+
     this.sliderSize = this.frame.nativeElement.clientWidth / 5;
-    this.scrollAmount = this.frame.nativeElement.scrollWidth / (this.scrollbar.nativeElement.clientWidth - this.sliderSize);
+    this.scrollAmount =
+      this.frame.nativeElement.scrollWidth /
+      (this.scrollbar.nativeElement.clientWidth - this.sliderSize);
     this.slider.nativeElement.style.width = this.sliderSize + 'px';
   }
 
-  private sliderStart(event: MouseEvent) {
-    this.direction = "none";
+  private onDragSlider(positionX: number) {
+    if (!this.sliding) return;
+    if (this.lastPos === 0) this.lastPos = positionX;
+    if (this.lastPos === positionX) {
+      this.direction = 'none';
+    } else if (this.lastPos < positionX) {
+      if (this.direction === 'left') this.sliderStart(positionX);
+      this.direction = 'right';
+      this.scroll(positionX, this.direction);
+    } else {
+      if (this.direction === 'right') this.sliderStart(positionX);
+      this.direction = 'left';
+      this.scroll(positionX, this.direction);
+    }
+    this.lastPos = positionX;
+  }
+
+  private sliderStart(positionX: number) {
+    this.direction = 'none';
     this.sliding = true;
-    this.slideStartedX = event.clientX;
+    this.slideStartedX = positionX;
     this.slideOffsetX = this.slider.nativeElement.offsetLeft;
   }
 
@@ -81,39 +109,18 @@ export class ScrollBarComponent implements OnInit {
     this.sliding = false;
   }
 
-  private scroll(mouseX: number, direction: String) {
-    var margin = (mouseX - this.slideStartedX) + this.slideOffsetX;
+  private scroll(positionX: number, direction: String) {
+    var margin = positionX - this.slideStartedX + this.slideOffsetX;
     if (direction === 'right') {
-      if ((margin + this.sliderSize) > this.scrollbar.nativeElement.clientWidth) {
-        margin = margin - ((margin + this.sliderSize) - this.scrollbar.nativeElement.clientWidth);
+      if (margin + this.sliderSize > this.scrollbar.nativeElement.clientWidth) {
+        margin = margin - (margin + this.sliderSize - this.scrollbar.nativeElement.clientWidth);
       } else {
         this.frame.nativeElement.scrollLeft = this.scrollAmount * margin;
       }
-    } else
-      if (margin < 0) {
-        return;
-      this.frame.nativeElement.scrollLeft = this.scrollAmount * margin;
-    }
-    this.slider.nativeElement.style.marginLeft = margin + 'px';
-  }
-
-  private scrollLeft(mouseX: number) {
-    var margin = (mouseX - this.slideStartedX) + this.slideOffsetX;
-    if ((margin + this.sliderSize) > this.scrollbar.nativeElement.clientWidth) {
-      margin = margin - ((margin + this.sliderSize) - this.scrollbar.nativeElement.clientWidth);
     } else {
+      if (margin < 0) return;
       this.frame.nativeElement.scrollLeft = this.scrollAmount * margin;
     }
     this.slider.nativeElement.style.marginLeft = margin + 'px';
   }
-
-  private scrollRight(mouseX: number) {
-    var margin = (mouseX - this.slideStartedX) + this.slideOffsetX;
-    if (margin < 0)
-      return;
-    this.frame.nativeElement.scrollLeft = this.scrollAmount * margin;
-    this.slider.nativeElement.style.marginLeft = margin + 'px';
-  }
-
 }
-
