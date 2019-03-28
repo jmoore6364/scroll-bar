@@ -6,12 +6,11 @@
 
 .slider {
   height: 30px;
-  width: 30px;
   background-color: gray;
 }
 
 .frame {
-  width: 300px; 
+  width: 300px;
   overflow: hidden
 }
 
