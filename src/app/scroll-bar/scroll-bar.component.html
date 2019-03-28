@@ -1,4 +1,4 @@
-<div #frame class="frame"><ng-content></ng-content></div>
+<div #frame class="frame" (touchstart)="touchStart($event)" (mousedown)="mouseDown($event)" draggable="false"><ng-content></ng-content></div>
 <div #scrollbar class="scrollbar" draggable="false">
   <div
     #slider

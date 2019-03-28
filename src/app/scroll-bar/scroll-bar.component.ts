@@ -42,6 +42,11 @@ export class ScrollBarComponent implements OnInit {
     this.mouseMove(event);
   }
 
+  @HostListener('document:mousedown', ['$event'])
+  documentMouseDown(event: MouseEvent) {
+    this.mouseDown(event);
+  }
+
   @HostListener('document:touchend', ['$event'])
   documentTouchEnd(event: TouchEvent) {
     this.sliderStop();
