@@ -20,7 +20,7 @@ export class ScrollBarComponent implements OnInit {
   @ViewChild('scrollbar') scrollbar!: ElementRef<HTMLElement>;
   @ViewChild('frame') frame!: ElementRef<HTMLElement>;
 
-  @Input('width') width: string = '100%';
+  @Input('width') width: string = '200px';
 
   sliding: boolean = false;
   direction: string = 'none';
@@ -45,6 +45,12 @@ export class ScrollBarComponent implements OnInit {
   @HostListener('document:mousedown', ['$event'])
   documentMouseDown(event: MouseEvent) {
     this.mouseDown(event);
+  }
+
+  @HostListener('window:resize', ['$event'])
+  documentResize(event: UIEvent) {
+    //console.log(event);
+    this.ngAfterViewInit();
   }
 
   @HostListener('document:touchend', ['$event'])
@@ -78,10 +84,12 @@ export class ScrollBarComponent implements OnInit {
   ngAfterViewInit() {
     this.scrollbar.nativeElement.style.width = this.width;
     this.frame.nativeElement.style.width = this.width;
-    this.sliderSize = this.frame.nativeElement.clientWidth / 5;
+    var p = (this.scrollbar.nativeElement.clientWidth / this.frame.nativeElement.scrollWidth);
+    console.log(p)
+    this.sliderSize = this.scrollbar.nativeElement.clientWidth - (this.scrollbar.nativeElement.clientWidth * .3);
     this.scrollAmount =
-      this.frame.nativeElement.scrollWidth /
-      (this.scrollbar.nativeElement.clientWidth - this.sliderSize);
+      this.frame.nativeElement.scrollWidth / this.sliderSize;
+      //(this.scrollbar.nativeElement.clientWidth - this.sliderSize);
     this.slider.nativeElement.style.width = this.sliderSize + 'px';
   }
 
