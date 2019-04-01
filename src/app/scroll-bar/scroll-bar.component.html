@@ -1,5 +1,5 @@
 <div #frame class="frame" (touchstart)="touchStart($event)" (mousedown)="mouseDown($event)" draggable="false"><ng-content></ng-content></div>
-<div #scrollbar class="scrollbar" draggable="false">
+<div #scrollbar class="scrollbar" (click)="scrollbarClick($event)" draggable="false">
   <div
     #slider
     class="slider"

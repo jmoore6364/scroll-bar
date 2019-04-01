@@ -1,34 +1,31 @@
 import {
   Component,
-  OnInit,
+  AfterViewInit,
   ChangeDetectionStrategy,
   ViewChild,
   ElementRef,
   HostListener,
-  Input,
 } from '@angular/core';
 
 @Component({
-  selector: 'esx-scroll-bar',
+  selector: 'essex-scroll-bar',
   templateUrl: './scroll-bar.component.html',
   styleUrls: ['./scroll-bar.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ScrollBarComponent implements OnInit {
+export class ScrollBarComponent implements AfterViewInit {
   @ViewChild('slider')
   slider!: ElementRef<HTMLElement>;
   @ViewChild('scrollbar') scrollbar!: ElementRef<HTMLElement>;
   @ViewChild('frame') frame!: ElementRef<HTMLElement>;
 
-  @Input('width') width: string = '200px';
-
-  sliding: boolean = false;
-  direction: string = 'none';
-  slideStartedX: number = 0;
-  slideOffsetX: number = 0;
-  lastPos: number = 0;
-  sliderSize: number = 0;
-  scrollAmount: number = 0;
+  sliding = false;
+  direction = 'none';
+  slideStartedX = 0;
+  slideOffsetX = 0;
+  lastPos = 0;
+  sliderSize = 0;
+  scrollAmount = 0;
 
   constructor() {}
 
@@ -44,12 +41,11 @@ export class ScrollBarComponent implements OnInit {
 
   @HostListener('document:mousedown', ['$event'])
   documentMouseDown(event: MouseEvent) {
-    this.mouseDown(event);
+    //this.mouseDown(event);
   }
 
   @HostListener('window:resize', ['$event'])
   documentResize(event: UIEvent) {
-    //console.log(event);
     this.ngAfterViewInit();
   }
 
@@ -79,17 +75,17 @@ export class ScrollBarComponent implements OnInit {
     this.onDragSlider(event.clientX);
   }
 
-  ngOnInit() {}
+  scrollbarClick(event: MouseEvent) {
+    this.sliderStart(event.clientX);
+    this.onDragSlider(event.clientX);
+    this.sliderStop();
+  }
 
   ngAfterViewInit() {
-    this.scrollbar.nativeElement.style.width = this.width;
-    this.frame.nativeElement.style.width = this.width;
-    var p = (this.scrollbar.nativeElement.clientWidth / this.frame.nativeElement.scrollWidth);
-    console.log(p)
-    this.sliderSize = this.scrollbar.nativeElement.clientWidth - (this.scrollbar.nativeElement.clientWidth * .3);
-    this.scrollAmount =
-      this.frame.nativeElement.scrollWidth / this.sliderSize;
-      //(this.scrollbar.nativeElement.clientWidth - this.sliderSize);
+    this.sliderSize =
+      this.scrollbar.nativeElement.clientWidth - this.scrollbar.nativeElement.clientWidth * 0.3;
+    this.scrollAmount = this.frame.nativeElement.scrollWidth /
+(this.scrollbar.nativeElement.clientWidth - this.sliderSize);
     this.slider.nativeElement.style.width = this.sliderSize + 'px';
   }
 
@@ -122,7 +118,8 @@ export class ScrollBarComponent implements OnInit {
   }
 
   private scroll(positionX: number, direction: String) {
-    var margin = positionX - this.slideStartedX + this.slideOffsetX;
+    let margin =
+      positionX - this.slideStartedX + this.slideOffsetX - this.scrollbar.nativeElement.offsetLeft;
     if (direction === 'right') {
       if (margin + this.sliderSize > this.scrollbar.nativeElement.clientWidth) {
         margin = margin - (margin + this.sliderSize - this.scrollbar.nativeElement.clientWidth);
@@ -130,7 +127,7 @@ export class ScrollBarComponent implements OnInit {
         this.frame.nativeElement.scrollLeft = this.scrollAmount * margin;
       }
     } else {
-      if (margin < 0) return;
+      if (margin < 0) margin = 0;
       this.frame.nativeElement.scrollLeft = this.scrollAmount * margin;
     }
     this.slider.nativeElement.style.marginLeft = margin + 'px';
